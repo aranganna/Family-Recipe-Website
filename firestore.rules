@@ -1,0 +1,95 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // ===============================================================
+    // Assumed Data Model
+    // ===============================================================
+    //
+    // Collection: recipes
+    // Document ID: auto-generated
+    // Fields:
+    //   - title: string (required, < 100 chars)
+    //   - description: string (required, < 1000 chars)
+    //   - ingredients: list of strings (required, < 50 items)
+    //   - instructions: string (required, < 5000 chars)
+    //   - category: string (required, one of CATEGORIES)
+    //   - prepTime: string (required, < 50 chars)
+    //   - servings: string (required, < 50 chars)
+    //   - imageUrl: string (optional, < 1000 chars)
+    //   - author: string (required, < 50 chars)
+    //   - authorId: string (required, matches auth.uid)
+    //   - createdAt: number (required)
+    //
+    // ===============================================================
+
+    // ===============================================================
+    // Helper Functions
+    // ===============================================================
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isAdmin() {
+      return isAuthenticated() &&
+        (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin' ||
+          (request.auth.token.email == "adeshranganna@gmail.com" && request.auth.token.email_verified == true));
+    }
+
+    function hasRequiredFields(fields) {
+      return request.resource.data.keys().hasAll(fields);
+    }
+
+    function isValidRecipe(data) {
+      let validCategories = ['Breakfast', 'Main', 'Side', 'Dessert', 'Baking', 'Drinks'];
+      return data.title is string && data.title.size() > 0 && data.title.size() < 100 &&
+             data.description is string && data.description.size() > 0 && data.description.size() < 1000 &&
+             data.ingredients is list && data.ingredients.size() > 0 && data.ingredients.size() < 50 &&
+             data.instructions is string && data.instructions.size() > 0 && data.instructions.size() < 5000 &&
+             data.category in validCategories &&
+             data.prepTime is string && data.prepTime.size() > 0 && data.prepTime.size() < 50 &&
+             data.servings is string && data.servings.size() > 0 && data.servings.size() < 50 &&
+             (!('imageUrl' in data) || (data.imageUrl is string && data.imageUrl.size() < 1000)) &&
+             data.author is string && data.author.size() > 0 && data.author.size() < 50 &&
+             data.authorId == request.auth.uid &&
+             data.createdAt is number;
+    }
+
+    // ===============================================================
+    // Collection Rules
+    // ===============================================================
+
+    match /recipes/{recipeId} {
+      // Recipes are readable by any authenticated family member
+      allow read: if isAuthenticated();
+      
+      // Any authenticated user can create a recipe
+      allow create: if isAuthenticated() && 
+                      hasRequiredFields(['title', 'description', 'ingredients', 'instructions', 'category', 'prepTime', 'servings', 'author', 'authorId', 'createdAt']) &&
+                      isValidRecipe(request.resource.data);
+      
+      // Only the author or an admin can update or delete a recipe
+      allow update: if isAuthenticated() && 
+                      (isOwner(resource.data.authorId) || isAdmin()) &&
+                      isValidRecipe(request.resource.data) &&
+                      request.resource.data.authorId == resource.data.authorId &&
+                      request.resource.data.createdAt == resource.data.createdAt;
+      
+      allow delete: if isAuthenticated() && (isOwner(resource.data.authorId) || isAdmin());
+    }
+
+    match /users/{userId} {
+      allow read: if isOwner(userId) || isAdmin();
+      allow create: if isOwner(userId) && request.resource.data.role == 'user';
+      allow update: if isAdmin();
+    }
+
+    // Default deny
+    match /{path=**} {
+      allow read, write: if false;
+    }
+  }
+}

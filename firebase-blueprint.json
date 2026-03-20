@@ -1,0 +1,29 @@
+{
+  "entities": {
+    "Recipe": {
+      "title": "Recipe",
+      "description": "A family recipe with ingredients, instructions, and metadata.",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string", "description": "The name of the recipe." },
+        "description": { "type": "string", "description": "A short story or description of the recipe." },
+        "ingredients": { "type": "array", "items": { "type": "string" }, "description": "List of ingredients." },
+        "instructions": { "type": "string", "description": "Step-by-step cooking instructions." },
+        "category": { "type": "string", "description": "The category of the recipe (e.g., Baking, Main)." },
+        "prepTime": { "type": "string", "description": "Estimated preparation time." },
+        "servings": { "type": "string", "description": "Number of servings." },
+        "imageUrl": { "type": "string", "description": "URL to a photo of the dish." },
+        "author": { "type": "string", "description": "The family member who shared the recipe." },
+        "authorId": { "type": "string", "description": "The UID of the user who added the recipe." },
+        "createdAt": { "type": "number", "description": "Timestamp when the recipe was added." }
+      },
+      "required": ["title", "description", "ingredients", "instructions", "category", "prepTime", "servings", "author", "createdAt"]
+    }
+  },
+  "firestore": {
+    "/recipes/{recipeId}": {
+      "schema": "Recipe",
+      "description": "Collection of shared family recipes."
+    }
+  }
+}

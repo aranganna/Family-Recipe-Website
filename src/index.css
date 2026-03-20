@@ -1,0 +1,53 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Tiro+Kannada&family=DM+Sans:wght@300;400;500&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-serif: "Playfair Display", serif;
+  --font-kannada: "Tiro Kannada", serif;
+  --font-sans: "DM Sans", ui-sans-serif, system-ui, sans-serif;
+
+  --color-saffron: #E8721C;
+  --color-turmeric: #F5A623;
+  --color-rose: #C0392B;
+  --color-jasmine: #FFF8E7;
+  --color-teal: #1A7F74;
+  --color-deep-green: #0D4A40;
+  --color-cream: #FDF6EC;
+  --color-bark: #3D1C02;
+  --color-gold: #D4A017;
+  --color-marigold: #FFAD1F;
+  --color-blush: #F9E4D4;
+}
+
+body {
+  @apply bg-cream text-bark font-sans;
+}
+
+.serif {
+  @apply font-serif;
+}
+
+.kannada {
+  @apply font-kannada;
+}
+
+.rangoli-pattern {
+  background-image: radial-gradient(circle, rgba(232, 114, 28, 0.1) 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+
+.rangoli-bg {
+  background-image:
+    radial-gradient(circle at 10% 50%, #E8721C 0%, transparent 40%),
+    radial-gradient(circle at 90% 20%, #F5A623 0%, transparent 35%),
+    radial-gradient(circle at 50% 90%, #C0392B 0%, transparent 30%);
+}
+
+.header-border {
+  background: repeating-linear-gradient(90deg,
+    #E8721C 0px, #E8721C 20px,
+    #F5A623 20px, #F5A623 40px,
+    #C0392B 40px, #C0392B 60px,
+    #1A7F74 60px, #1A7F74 80px
+  );
+}
